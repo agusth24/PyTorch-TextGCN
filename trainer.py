@@ -19,6 +19,7 @@ from utils import preprocess_adj
 from utils import print_graph_detail
 from utils import read_file
 from utils import return_seed
+from argparse import ArgumentParser
 
 th.backends.cudnn.deterministic = True
 th.backends.cudnn.benchmark = True
@@ -48,6 +49,8 @@ class PrepareData:
         graph = nx.read_weighted_edgelist(f"{self.graph_path}/{args.dataset}.txt"
                                           , nodetype=int)
         print_graph_detail(graph)
+        
+        print("prepare data: to_scipy_sparse_matrix")
         adj = nx.to_scipy_sparse_matrix(graph,
                                         nodelist=list(range(graph.number_of_nodes())),
                                         weight='weight',
@@ -60,6 +63,7 @@ class PrepareData:
         # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         # features
+        print("prepare data: features")
         self.nfeat_dim = graph.number_of_nodes()
         row = list(range(self.nfeat_dim))
         col = list(range(self.nfeat_dim))
@@ -74,7 +78,7 @@ class PrepareData:
 
         # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         # target
-
+        print("prepare data: target")
         target_fn = f"data/text_dataset/{self.args.dataset}.txt"
         target = np.array(pd.read_csv(target_fn,
                                       sep="\t",
@@ -211,17 +215,8 @@ class TextGCNTrainer:
         return test_desc
 
 
-def main(dataset, times):
-    args = parameter_parser()
-    args.dataset = dataset
-
+def main(args):
     args.device = th.device('cuda') if th.cuda.is_available() else th.device('cpu')
-    args.nhid = 200
-    args.max_epoch = 200
-    args.dropout = 0.5
-    args.val_ratio = 0.1
-    args.early_stopping = 10
-    args.lr = 0.02
     model = GCN
 
     print(args)
@@ -231,7 +226,7 @@ def main(dataset, times):
 
     record = LogResult()
     seed_lst = list()
-    for ind, seed in enumerate(return_seed(times)):
+    for ind, seed in enumerate(return_seed(args.times)):
         print(f"\n\n==> {ind}, seed:{seed}")
         args.seed = seed
         seed_lst.append(seed)
@@ -258,9 +253,16 @@ def main(dataset, times):
 
 if __name__ == '__main__':
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    # for d in ["mr", "ohsumed", "R52", "R8", "20ng"]:
-    #     main(d)
-    main("mr", 1)
-    # main("ohsumed")
-    # main("R8", 1)
+    
+    parser = ArgumentParser()
+    parser.add_argument("--dataset", type=str, default='mr', help="List of dataset: 20ng, mr, ohsumed, R8, R25, kontan1, kontan2")
+    parser.add_argument("--times", type=int, default=1, help="Repeat training")
+    parser.add_argument("--dropout", type=float, default=0.5, help="Dropout")
+    parser.add_argument("--early_stopping", type=int, default=10, help="Early stopping")
+    parser.add_argument("--lr", type=float, default=0.02, help="Learning rate")
+    parser.add_argument("--max_epoch", type=int, default=200, help="No of epochs")
+    parser.add_argument("--nhid", type=int, default=200, help="No of hidden layer")
+    parser.add_argument("--val_ratio", type=float, default=0.1, help="Validation data train ratio")
+    args = parser.parse_args()
+    main(args)
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

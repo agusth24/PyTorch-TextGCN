@@ -15,15 +15,17 @@ from tqdm import tqdm
 
 from utils import print_graph_detail
 
+from argparse import ArgumentParser
+
 
 def get_window(content_lst, window_size):
     """
-    找出窗口
+    find window
     :param content_lst:
     :param window_size:
     :return:
     """
-    word_window_freq = defaultdict(int)  # w(i)  单词在窗口单位内出现的次数
+    word_window_freq = defaultdict(int)  # w(i)  the number of times the word appears in the window unit
     word_pair_count = defaultdict(int)  # w(i, j)
     windows_len = 0
     for words in tqdm(content_lst, desc="Split by window"):
@@ -95,9 +97,9 @@ class BuildGraph:
         if not os.path.exists(self.graph_path):
             os.makedirs(self.graph_path)
 
-        self.word2id = dict()  # 单词映射
+        self.word2id = dict()  # word map
         self.dataset = dataset
-        print(f"\n==> 现在的数据集是:{dataset}<==")
+        print(f"\n==> Current dataset:{dataset}<==")
 
         self.g = nx.Graph()
 
@@ -121,10 +123,10 @@ class BuildGraph:
         print_graph_detail(self.g)
 
     def get_tfidf_edge(self):
-        # 获得tfidf权重矩阵（sparse）和单词列表
+        # get tfidf weight matrix (sparse) and word list
         tfidf_vec = self.get_tfidf_vec()
 
-        count_lst = list()  # 统计每个句子的长度
+        count_lst = list()  # Count the length of each sentence
         for ind, row in tqdm(enumerate(tfidf_vec),
                              desc="generate tfidf edge"):
             count = 0
@@ -138,7 +140,7 @@ class BuildGraph:
 
     def get_tfidf_vec(self):
         """
-        学习获得tfidf矩阵，及其对应的单词序列
+        Learn to get the tfidf matrix, and its corresponding word sequence
         :param content_lst:
         :return:
         """
@@ -164,7 +166,7 @@ class BuildGraph:
 
         self.node_num = tfidf_vec.shape[0]
 
-        # 映射单词
+        # map words
         vocab_lst = text_tfidf["vect"].get_feature_names()
         print("vocab_lst len:", len(vocab_lst))
         for ind, word in enumerate(vocab_lst):
@@ -182,13 +184,12 @@ class BuildGraph:
         print("\n")
 
 
-def main():
-    BuildGraph("mr")
-    BuildGraph("ohsumed")
-    BuildGraph("R52")
-    BuildGraph("R8")
-    BuildGraph("20ng")
+def main(args):
+    BuildGraph(args.dataset)
 
 
 if __name__ == '__main__':
-    main()
+    parser = ArgumentParser()
+    parser.add_argument("--dataset", type=str, default='mr', help="List of dataset: 20ng, mr, ohsumed, R8, R25, kontan1, kontan2")
+    args = parser.parse_args()
+    main(args)

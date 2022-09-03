@@ -91,7 +91,7 @@ def read_file(path, mode='r', encoding=None):
 
 def print_graph_detail(graph):
     """
-    格式化显示Graph参数
+    Formatted display Graph parameters
     :param graph:
     :return:
     """
@@ -100,7 +100,7 @@ def print_graph_detail(graph):
            "edges"    : nx.number_of_edges(graph),
            "selfloops": nx.number_of_selfloops(graph),
            "isolates" : nx.number_of_isolates(graph),
-           "覆盖度"      : 1 - nx.number_of_isolates(graph) / nx.number_of_nodes(graph), }
+           "Coverage"      : 1 - nx.number_of_isolates(graph) / nx.number_of_nodes(graph), }
     print_table(dst)
 
 

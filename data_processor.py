@@ -6,6 +6,7 @@ import numpy as np
 
 from tqdm import tqdm
 
+from argparse import ArgumentParser
 
 class StringProcess(object):
     def __init__(self):
@@ -116,12 +117,12 @@ class CorpusProcess:
             for indx, item in tqdm(enumerate(fin), desc="clean the text"):
                 data = item.strip().decode('latin1')
                 data = sp.clean_str(data)
-                if self.dataset not in {"mr"}:
+                if self.dataset not in {"mr","kontan1","kontan2"}:
                     data = sp.remove_stopword(data)
                 word_lst.extend(data.split())
 
         word_st = set()
-        if self.dataset not in {"mr"}:
+        if self.dataset not in {"mr","kontan1","kontan2"}:
             for word, value in Counter(word_lst).items():
                 if value < 5:
                     continue
@@ -135,7 +136,7 @@ class CorpusProcess:
                 for line in tqdm(fin):
                     lines_str = line.strip().decode('latin1')
                     lines_str = sp.clean_str(lines_str)
-                    if self.dataset not in {"mr"}:
+                    if self.dataset not in {"mr","kontan1","kontan2"}:
                         lines_str = sp.remove_stopword(lines_str)
                         lines_str = remove_less_word(lines_str, word_st)
 
@@ -149,14 +150,13 @@ class CorpusProcess:
         print("Total number of words:", len(word_st))
 
 
-def main():
-    CorpusProcess("R52")
-    # CorpusProcess("20ng")
-    # CorpusProcess("mr")
-    # CorpusProcess("ohsumed")
-    # CorpusProcess("R8")
+def main(args):
+    CorpusProcess(args.dataset)
     # pass
 
 
 if __name__ == '__main__':
-    main()
+    parser = ArgumentParser()
+    parser.add_argument("--dataset", type=str, default='mr', help="List of dataset: 20ng, mr, ohsumed, R8, R25, kontan1, kontan2")
+    args = parser.parse_args()
+    main(args)
