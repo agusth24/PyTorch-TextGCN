@@ -51,8 +51,11 @@ class CudaUse(object):
     def __init__(self):
         self.cuda_available = th.cuda.is_available()
         if self.cuda_available:
-            from fastai.utils.pynvml_gate import load_pynvml_env
-            self.pynvml = load_pynvml_env()
+            from pynvml import nvmlInit,nvmlDeviceGetCount,nvmlDeviceGetHandleByIndex,nvmlDeviceGetMemoryInfo
+            try:
+                nvmlInit()
+            except:
+                print("NVML Shared Library Not Found")
 
     def get_cuda_id(self):
         if self.cuda_available:
@@ -64,7 +67,7 @@ class CudaUse(object):
 
     def gpu_mem_get_all(self):
         "get total, used and free memory (in MBs) for each available gpu"
-        return list(map(self.gpu_mem_get, range(self.pynvml.nvmlDeviceGetCount())))
+        return list(map(self.gpu_mem_get, range(nvmlDeviceGetCount())))
 
     def gpu_mem_get(self, _id=None):
         """get total, used and free memory (in MBs) for gpu `id`. if `id` is not passed,
@@ -75,12 +78,12 @@ class CudaUse(object):
         if _id is None:
             _id = th.cuda.current_device()
         try:
-            handle = self.pynvml.nvmlDeviceGetHandleByIndex(_id)
-            info = self.pynvml.nvmlDeviceGetMemoryInfo(handle)
-            # return GPUMemory(*(map(b2mb, [info.total, info.free, info.used])), id=_id)
-            return b2mb(info.used)
+            handle = nvmlDeviceGetHandleByIndex(_id)
+            info = nvmlDeviceGetMemoryInfo(handle)
+            return info.used
+            # return b2mb(info.used)
         except:
-            return GPUMemory(0, 0, 0, -1)
+            return 0
 
 
 def read_file(path, mode='r', encoding=None):
