@@ -15,6 +15,7 @@ Tested on the 20NG/R8/R52/Ohsumed/MR data set, the code on this repository can a
 NOTE: The result of the experiment is to repeat the run 1.
 
 Adding dataset kontan1: Multiclass classification (5 class), news in Indonesia. Accuracy: 0.000
+
 Adding dataset kontan2: Sentiment classification, news in Indonesia. Accuracy: 0.000
 
 ## Requirements
@@ -36,6 +37,8 @@ Adding dataset kontan2: Sentiment classification, news in Indonesia. Accuracy: 0
 1. Process the data first, run `data_processor.py`
 2. Generate graph, run `build_graph.py`
 3. Training model, run `trainer.py`
+
+add -h for help on each usage command.
 
 ## References
 [1] [Yao, L. , Mao, C. , & Luo, Y. . (2018). Graph convolutional networks for text classification.](https://arxiv.org/abs/1809.05679)
